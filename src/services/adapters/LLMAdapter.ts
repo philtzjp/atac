@@ -125,7 +125,7 @@ export class LLMAdapter implements ILLMAdapter {
                 model,
                 messages: options.messages,
                 system: options.system,
-                tools: ai_tools,
+                tools: ai_tools as Parameters<typeof generateText>[0]["tools"],
                 maxTokens: options.max_tokens ?? 2000,
             })
 
@@ -148,7 +148,7 @@ export class LLMAdapter implements ILLMAdapter {
 
     private buildToolDefinitions(
         tools: ToolDefinition[]
-    ): Record<string, ReturnType<typeof tool>> {
+    ): Record<string, unknown> {
         const tool_entries = tools.map(t => {
             const tool_def = tool({
                 description: t.description,
