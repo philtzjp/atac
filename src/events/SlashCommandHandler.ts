@@ -17,7 +17,7 @@ export class SlashCommandHandler implements EventHandler {
         this.orchestrator = orchestrator
     }
 
-    register(client: Client): void {
+    register(_client: Client): void {
         logger.info("EVENT_HANDLER_REGISTERED", this.name)
     }
 

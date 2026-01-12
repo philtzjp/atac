@@ -57,13 +57,13 @@ export class PluginLoader {
 
         try {
             const plugin_module = await import(entry.metadata.path)
-            const PluginClass = plugin_module.default
+            const plugin_class = plugin_module.default
 
             const required_services = await this.getRequiredServices(
                 entry.metadata.required_services
             )
 
-            entry.instance = new PluginClass(required_services, config)
+            entry.instance = new plugin_class(required_services, config)
             entry.status = "loaded"
 
             logger.info("PLUGIN_LOADED", plugin_id)

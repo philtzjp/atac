@@ -97,7 +97,7 @@ export interface LogEntry {
  */
 export function formatLogMessage(code: LogCode, ...args: unknown[]): string {
     let message = LOG_MESSAGES[code]
-    args.forEach((arg, index) => {
+    args.forEach((arg, _index) => {
         message = message.replace("%s", String(arg))
         message = message.replace("%d", String(arg))
     })
@@ -120,18 +120,18 @@ export class Logger {
         const formatted = `[${timestamp}] [${this.prefix}] [${level.toUpperCase()}] ${message}`
 
         switch (level) {
-            case "debug":
-                console.debug(formatted)
-                break
-            case "info":
-                console.info(formatted)
-                break
-            case "warn":
-                console.warn(formatted)
-                break
-            case "error":
-                console.error(formatted)
-                break
+        case "debug":
+            console.debug(formatted)
+            break
+        case "info":
+            console.info(formatted)
+            break
+        case "warn":
+            console.warn(formatted)
+            break
+        case "error":
+            console.error(formatted)
+            break
         }
     }
 

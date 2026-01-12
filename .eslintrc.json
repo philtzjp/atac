@@ -24,7 +24,7 @@
             "error",
             {
                 "selector": "variable",
-                "format": ["snake_case", "UPPER_CASE"],
+                "format": ["snake_case", "UPPER_CASE", "camelCase"],
                 "leadingUnderscore": "allow"
             },
             {
