@@ -30,5 +30,5 @@ temp/
 tmp/
 *.tmp
 
-# Package manager
-package-lock.json
+# Recordings (local only)
+recordings/
