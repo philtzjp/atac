@@ -8,6 +8,7 @@ import { logger } from "../../utils/logs.js"
  */
 interface CacheAdapterConfig {
     redis_url: string
+    redis_token: string
 }
 
 /**
@@ -20,6 +21,7 @@ export class CacheAdapter implements ICacheAdapter {
     constructor(config: CacheAdapterConfig) {
         this.redis = new Redis({
             url: config.redis_url,
+            token: config.redis_token,
         })
     }
 

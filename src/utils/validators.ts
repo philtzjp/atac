@@ -13,6 +13,7 @@ export const envSchema = z.object({
     PINECONE_API_KEY: z.string().optional(),
     PINECONE_INDEX_NAME: z.string().optional(),
     REDIS_URL: z.string().optional(),
+    REDIS_TOKEN: z.string().optional(),
     FIREBASE_PROJECT_ID: z.string().optional(),
     FIREBASE_PRIVATE_KEY: z.string().optional(),
     FIREBASE_CLIENT_EMAIL: z.string().optional(),

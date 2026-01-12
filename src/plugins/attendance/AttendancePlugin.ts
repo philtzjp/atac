@@ -96,15 +96,16 @@ export class AttendancePlugin extends BasePlugin {
             return
         }
 
+        const check_in_time = new Date()
         const record: AttendanceRecord = {
             user_id,
             date,
-            check_in_time: new Date(),
+            check_in_time,
         }
 
         await data_adapter.set(collection, doc_id, record)
 
-        const time_str = record.check_in_time.toLocaleTimeString("ja-JP")
+        const time_str = check_in_time.toLocaleTimeString("ja-JP")
         this.setSuccessResponse(context, `Check-in recorded at ${time_str}`)
     }
 

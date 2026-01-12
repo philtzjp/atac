@@ -2,7 +2,7 @@ import { createError } from "../utils/errors.js"
 import { logger } from "../utils/logs.js"
 import type { PluginMetadata, PluginStatus } from "../types/plugin.js"
 import type { BasePlugin } from "../plugins/BasePlugin.js"
-import type { ServiceContainer } from "./ServiceContainer.js"
+import { ServiceContainer } from "./ServiceContainer.js"
 
 /**
  * プラグインレジストリエントリ

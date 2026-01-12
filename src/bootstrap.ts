@@ -75,10 +75,11 @@ function registerServices(services: ServiceContainer, env: EnvConfig): void {
         })
     }
 
-    if (env.REDIS_URL) {
+    if (env.REDIS_URL && env.REDIS_TOKEN) {
         services.register("cache", () =>
             new CacheAdapter({
                 redis_url: env.REDIS_URL!,
+                redis_token: env.REDIS_TOKEN!,
             })
         )
     }
@@ -133,7 +134,7 @@ function registerPlugins(plugin_loader: PluginLoader, services: ServiceContainer
                 name: metadata.name,
                 version: metadata.version,
                 path: metadata.path,
-                required_services: metadata.required_services,
+                required_services: [...metadata.required_services],
             })
         }
     }
@@ -167,18 +168,20 @@ async function loadCustomerConfigs(
                 if (!plugin_loader.isLoaded(feature_id)) {
                     const plugin_instance = createPluginInstance(feature_id)
                     if (plugin_instance) {
+                        const plugin_metadata = PLUGIN_REGISTRY[feature_id as keyof typeof PLUGIN_REGISTRY]
                         plugin_loader.registerMetadata({
                             id: feature_id,
-                            name: PLUGIN_REGISTRY[feature_id as keyof typeof PLUGIN_REGISTRY]?.name ?? feature_id,
+                            name: plugin_metadata?.name ?? feature_id,
                             version: "1.0.0",
                             path: "",
-                            required_services: PLUGIN_REGISTRY[feature_id as keyof typeof PLUGIN_REGISTRY]?.required_services ?? [],
+                            required_services: plugin_metadata ? [...plugin_metadata.required_services] : [],
                         })
 
                         const services = orchestrator.getServices()
                         const service_container = new ServiceContainer()
 
-                        for (const service_name of PLUGIN_REGISTRY[feature_id as keyof typeof PLUGIN_REGISTRY]?.required_services ?? []) {
+                        const required_services = plugin_metadata?.required_services ?? []
+                        for (const service_name of required_services) {
                             if (services.has(service_name)) {
                                 const service = await services.get(service_name)
                                 service_container.set(service_name, service)

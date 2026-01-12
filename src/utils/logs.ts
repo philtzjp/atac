@@ -72,6 +72,9 @@ export const LOG_MESSAGES = {
     ERROR_OCCURRED: "Error occurred: %s",
     ERROR_HANDLED: "Error handled: %s",
     ERROR_UNHANDLED: "Unhandled error: %s",
+
+    // Event mapping logs
+    EVENT_MAPPING_NOT_FOUND: "No event mapping found for event type: %s",
 } as const
 
 export type LogCode = keyof typeof LOG_MESSAGES
@@ -96,7 +99,7 @@ export interface LogEntry {
  * ログメッセージをフォーマット
  */
 export function formatLogMessage(code: LogCode, ...args: unknown[]): string {
-    let message = LOG_MESSAGES[code]
+    let message: string = LOG_MESSAGES[code]
     args.forEach((arg, _index) => {
         message = message.replace("%s", String(arg))
         message = message.replace("%d", String(arg))

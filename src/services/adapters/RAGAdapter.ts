@@ -84,16 +84,21 @@ export class RAGAdapter implements IRAGAdapter {
                     const content = msg.content
                     const embedding = await this.getEmbedding(content)
 
+                    const metadata: Record<string, string | number> = {
+                        content,
+                        author_id: msg.author.id,
+                        channel_id: msg.channelId,
+                        timestamp: msg.createdTimestamp,
+                    }
+
+                    if (msg.guildId) {
+                        metadata.guild_id = msg.guildId
+                    }
+
                     return {
                         id: msg.id,
                         values: embedding,
-                        metadata: {
-                            content,
-                            author_id: msg.author.id,
-                            channel_id: msg.channelId,
-                            guild_id: msg.guildId,
-                            timestamp: msg.createdTimestamp,
-                        },
+                        metadata,
                     }
                 })
             )

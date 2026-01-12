@@ -447,3 +447,35 @@ TranscriptionSegment:
     end: number       # 終了時間（秒）
     text: string      # セグメントテキスト
     speaker_id: string?  # 話者ID（オプション）
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+
+EnvironmentVariables:
+  description: 必要な環境変数一覧
+  variables:
+    # Discord (Required)
+    DISCORD_TOKEN: string        # Discord Bot Token
+    DISCORD_CLIENT_ID: string    # Discord Application Client ID
+    DISCORD_GUILD_ID: string?    # 開発用Guild ID
+
+    # AI Services (Optional)
+    OPENAI_API_KEY: string?      # OpenAI API Key
+    ANTHROPIC_API_KEY: string?   # Anthropic API Key
+
+    # Pinecone Vector DB (Optional)
+    PINECONE_API_KEY: string?    # Pinecone API Key
+    PINECONE_INDEX_NAME: string? # Pinecone Index Name
+
+    # Upstash Redis (Optional)
+    REDIS_URL: string?           # Upstash Redis REST URL
+    REDIS_TOKEN: string?         # Upstash Redis REST Token
+
+    # Firebase (Optional)
+    FIREBASE_PROJECT_ID: string?    # Firebase Project ID
+    FIREBASE_PRIVATE_KEY: string?   # Firebase Service Account Private Key
+    FIREBASE_CLIENT_EMAIL: string?  # Firebase Service Account Email
+
+    # Google Calendar (Optional)
+    GOOGLE_CALENDAR_CREDENTIALS: string?  # Google Calendar Service Account JSON

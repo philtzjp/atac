@@ -1,7 +1,6 @@
-import { generateText, streamText, tool } from "ai"
+import { generateText, streamText, tool, type LanguageModelV1 } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { anthropic } from "@ai-sdk/anthropic"
-import type { LanguageModel } from "ai"
 import type { ILLMAdapter } from "../interfaces/ILLMAdapter.js"
 import type {
     LLMGenerateOptions,
@@ -27,20 +26,20 @@ interface LLMAdapterConfig {
  * Vercel AI SDKを使用
  */
 export class LLMAdapter implements ILLMAdapter {
-    private readonly models: Map<string, LanguageModel> = new Map()
+    private readonly models: Map<string, LanguageModelV1> = new Map()
     private readonly default_model: string
 
     constructor(config: LLMAdapterConfig) {
         if (config.openai_api_key) {
-            this.models.set("gpt-4", openai("gpt-4"))
-            this.models.set("gpt-4-turbo", openai("gpt-4-turbo"))
-            this.models.set("gpt-3.5-turbo", openai("gpt-3.5-turbo"))
+            this.models.set("gpt-4", openai("gpt-4") as unknown as LanguageModelV1)
+            this.models.set("gpt-4-turbo", openai("gpt-4-turbo") as unknown as LanguageModelV1)
+            this.models.set("gpt-3.5-turbo", openai("gpt-3.5-turbo") as unknown as LanguageModelV1)
         }
 
         if (config.anthropic_api_key) {
-            this.models.set("claude-3-opus", anthropic("claude-3-opus-20240229"))
-            this.models.set("claude-3-sonnet", anthropic("claude-3-sonnet-20240229"))
-            this.models.set("claude-3-haiku", anthropic("claude-3-haiku-20240307"))
+            this.models.set("claude-3-opus", anthropic("claude-3-opus-20240229") as unknown as LanguageModelV1)
+            this.models.set("claude-3-sonnet", anthropic("claude-3-sonnet-20240229") as unknown as LanguageModelV1)
+            this.models.set("claude-3-haiku", anthropic("claude-3-haiku-20240307") as unknown as LanguageModelV1)
         }
 
         this.default_model = config.default_model ?? "gpt-4"
@@ -150,16 +149,17 @@ export class LLMAdapter implements ILLMAdapter {
     private buildToolDefinitions(
         tools: ToolDefinition[]
     ): Record<string, ReturnType<typeof tool>> {
-        return Object.fromEntries(
-            tools.map(t => [
-                t.name,
-                tool({
-                    description: t.description,
-                    parameters: t.parameters as Parameters<typeof tool>[0]["parameters"],
-                    execute: t.execute as Parameters<typeof tool>[0]["execute"],
-                }),
-            ])
-        )
+        const tool_entries = tools.map(t => {
+            const tool_def = tool({
+                description: t.description,
+                parameters: t.parameters as Parameters<typeof tool>[0]["parameters"],
+                execute: async (args: Record<string, unknown>) => {
+                    return await t.execute(args)
+                },
+            })
+            return [t.name, tool_def] as const
+        })
+        return Object.fromEntries(tool_entries)
     }
 
     /**
