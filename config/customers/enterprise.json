@@ -1,0 +1,58 @@
+{
+    "customer_id": "enterprise",
+    "name": "Enterprise Corp",
+    "features": ["chat", "attendance", "calendar", "reminder"],
+    "event_mappings": [
+        {
+            "event_type": "slash",
+            "feature_id": "chat",
+            "config": {
+                "command_name": "question",
+                "model": "claude-3-sonnet",
+                "use_rag": true,
+                "rag_top_k": 5,
+                "system_prompt": "You are an enterprise assistant with access to company knowledge."
+            }
+        },
+        {
+            "event_type": "mention",
+            "feature_id": "chat",
+            "config": {
+                "model": "claude-3-sonnet",
+                "use_rag": true,
+                "cache_ttl_seconds": 600
+            }
+        },
+        {
+            "event_type": "slash",
+            "feature_id": "attendance",
+            "config": {
+                "command_name": "attendance",
+                "collection_name": "enterprise_attendance"
+            }
+        },
+        {
+            "event_type": "slash",
+            "feature_id": "calendar",
+            "config": {
+                "command_name": "schedule",
+                "calendar_id": "primary",
+                "timezone": "Asia/Tokyo"
+            }
+        },
+        {
+            "event_type": "cron",
+            "feature_id": "reminder",
+            "config": {
+                "schedule": "0 9 * * MON-FRI",
+                "message": "Daily standup meeting at 10:00 AM",
+                "channel_id": "CHANNEL_ID_HERE"
+            }
+        }
+    ],
+    "settings": {
+        "language": "ja",
+        "timezone": "Asia/Tokyo",
+        "plan": "enterprise"
+    }
+}

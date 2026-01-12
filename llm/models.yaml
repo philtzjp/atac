@@ -1,0 +1,449 @@
+# ATAC Core - Data Models
+# このファイルはプロジェクトで使用するすべてのデータモデルを定義します。
+# 実装が変更されたら、このファイルも必ず更新してください。
+
+# =============================================================================
+# Event Types
+# =============================================================================
+
+EventType:
+  description: イベントタイプの定義
+  values:
+    - slash      # Discordスラッシュコマンド
+    - mention    # ボットへのメンション
+    - reply      # ボットメッセージへのリプライ
+    - cron       # スケジュール実行
+    - webhook    # 外部Webhook
+
+EventContext:
+  description: すべてのイベントハンドラーに渡される共通コンテキスト
+  fields:
+    customer_id: string    # 顧客ID
+    guild_id: string       # Discord Guild ID
+    user_id: string        # ユーザーID
+    channel_id: string     # チャンネルID
+    type: EventType        # イベントタイプ
+    payload: object        # イベント固有のペイロード
+    timestamp: Date        # タイムスタンプ
+
+EventMapping:
+  description: イベントタイプとプラグインの対応付け
+  fields:
+    event_type: EventType  # イベントタイプ
+    feature_id: string     # プラグインID
+    config: object         # プラグイン設定
+
+DiscordResponse:
+  description: Discordレスポンス構造
+  fields:
+    message: string?       # テキストメッセージ
+    embeds: Embed[]?       # Embedオブジェクト配列
+    components: ActionRowBuilder[]?  # コンポーネント配列
+    files: AttachmentBuilder[]?      # ファイル添付
+
+# =============================================================================
+# Customer Types
+# =============================================================================
+
+CustomerConfig:
+  description: 顧客ごとの機能セットとイベントマッピングを定義
+  fields:
+    customer_id: string         # 顧客ID
+    name: string                # 顧客名
+    features: string[]          # 有効なプラグインID配列
+    event_mappings: EventMapping[]  # イベントマッピング配列
+    settings: object            # カスタム設定
+
+CustomerProfile:
+  description: 認証後のユーザー情報
+  fields:
+    customer_id: string    # 顧客ID
+    name: string           # 顧客名
+    email: string?         # メールアドレス
+    plan: CustomerPlan     # プランタイプ
+    created_at: Date       # 作成日時
+    updated_at: Date       # 更新日時
+
+CustomerPlan:
+  description: 顧客プランタイプ
+  values:
+    - free        # 無料プラン
+    - basic       # ベーシックプラン
+    - enterprise  # エンタープライズプラン
+
+# =============================================================================
+# Plugin Types
+# =============================================================================
+
+PluginConfig:
+  description: プラグイン設定
+  fields:
+    id: string              # プラグインID
+    name: string            # プラグイン名
+    version: string         # バージョン
+    required_services: string[]  # 依存サービス配列
+
+PluginContext:
+  description: プラグイン実行時に渡されるコンテキスト
+  extends: EventContext
+  fields:
+    services: ServiceContainer  # サービスコンテナ
+    config: object              # プラグイン設定
+    response: DiscordResponse   # レスポンスオブジェクト
+
+PluginMetadata:
+  description: プラグインレジストリに登録される情報
+  fields:
+    id: string                  # プラグインID
+    name: string                # プラグイン名
+    version: string             # バージョン
+    path: string                # モジュールパス
+    required_services: string[] # 依存サービス配列
+    description: string?        # 説明
+
+PluginStatus:
+  description: プラグインステータス
+  values:
+    - unloaded  # 未ロード
+    - loading   # ロード中
+    - loaded    # ロード済み
+    - error     # エラー
+
+# =============================================================================
+# Service Types - LLM
+# =============================================================================
+
+LLMGenerateOptions:
+  description: LLM生成オプション
+  fields:
+    messages: CoreMessage[]  # メッセージ配列
+    model: string?           # モデル名
+    system: string?          # システムプロンプト
+    temperature: number?     # 温度パラメータ
+    max_tokens: number?      # 最大トークン数
+
+LLMResponse:
+  description: LLMレスポンス
+  fields:
+    text: string                     # 生成テキスト
+    finish_reason: FinishReason      # 終了理由
+
+FinishReason:
+  description: LLM生成終了理由
+  values:
+    - stop        # 正常終了
+    - length      # トークン制限
+    - tool-calls  # ツール呼び出し
+    - error       # エラー
+
+ToolDefinition:
+  description: ツール定義
+  fields:
+    name: string           # ツール名
+    description: string    # 説明
+    parameters: object     # パラメータスキーマ
+    execute: function      # 実行関数
+
+LLMToolCall:
+  description: LLMツール呼び出し
+  fields:
+    tool_name: string   # ツール名
+    args: object        # 引数
+    result: unknown?    # 実行結果
+
+LLMToolResponse:
+  description: LLMツールレスポンス
+  fields:
+    text: string              # 生成テキスト
+    tool_calls: LLMToolCall[] # ツール呼び出し配列
+
+# =============================================================================
+# Service Types - RAG
+# =============================================================================
+
+RAGOptions:
+  description: RAG検索オプション
+  fields:
+    top_k: number?       # 取得件数
+    min_score: number?   # 最小スコア
+    namespace: string?   # 名前空間
+
+RAGResult:
+  description: RAG検索結果
+  fields:
+    id: string           # ドキュメントID
+    content: string      # コンテンツ
+    score: number        # 類似度スコア
+    metadata: object?    # メタデータ
+
+# =============================================================================
+# Service Types - Data
+# =============================================================================
+
+QueryFilter:
+  description: Firestoreクエリフィルター
+  fields:
+    field: string                  # フィールド名
+    operator: QueryOperator        # 演算子
+    value: unknown                 # 値
+
+QueryOperator:
+  description: クエリ演算子
+  values:
+    - "=="           # 等しい
+    - "!="           # 等しくない
+    - ">"            # より大きい
+    - "<"            # より小さい
+    - ">="           # 以上
+    - "<="           # 以下
+    - "in"           # 配列に含まれる
+    - "not-in"       # 配列に含まれない
+    - "array-contains"  # 配列が含む
+
+# =============================================================================
+# Service Types - Calendar
+# =============================================================================
+
+CalendarEvent:
+  description: カレンダーイベント
+  fields:
+    id: string?           # イベントID
+    title: string         # タイトル
+    description: string?  # 説明
+    start_time: Date      # 開始時刻
+    end_time: Date        # 終了時刻
+    location: string?     # 場所
+    attendees: string[]?  # 参加者メールアドレス配列
+
+ListEventsOptions:
+  description: カレンダーイベント一覧オプション
+  fields:
+    calendar_id: string?   # カレンダーID
+    start_date: Date?      # 開始日
+    end_date: Date?        # 終了日
+    max_results: number?   # 最大取得件数
+
+# =============================================================================
+# Service Types - Auth
+# =============================================================================
+
+UserProfile:
+  description: ユーザープロファイル（認証）
+  fields:
+    uid: string            # ユーザーID
+    email: string?         # メールアドレス
+    display_name: string?  # 表示名
+    photo_url: string?     # プロフィール画像URL
+    verified: boolean      # メール認証済みフラグ
+
+# =============================================================================
+# Domain Types - Attendance
+# =============================================================================
+
+AttendanceRecord:
+  description: 勤怠レコード
+  collection: attendance
+  fields:
+    user_id: string           # ユーザーID
+    date: string              # 日付（YYYY-MM-DD）
+    check_in_time: Date?      # チェックイン時刻
+    check_out_time: Date?     # チェックアウト時刻
+    duration_minutes: number? # 勤務時間（分）
+    note: string?             # メモ
+
+# =============================================================================
+# Internal Types
+# =============================================================================
+
+ServiceEntry:
+  description: サービスエントリー（DIコンテナ用）
+  fields:
+    factory: function    # ファクトリ関数
+    instance: unknown?   # インスタンス
+
+# =============================================================================
+# Error Types
+# =============================================================================
+
+ATACError:
+  description: ATACカスタムエラー
+  extends: Error
+  fields:
+    code: ErrorCode           # エラーコード
+    details: object?          # 詳細情報
+
+ErrorCode:
+  description: エラーコード一覧
+  values:
+    # Customer errors
+    - CUSTOMER_NOT_FOUND
+    - CUSTOMER_CONFIG_INVALID
+    - CUSTOMER_UNAUTHORIZED
+    # Plugin errors
+    - PLUGIN_NOT_FOUND
+    - PLUGIN_NOT_LOADED
+    - PLUGIN_LOAD_FAILED
+    - PLUGIN_INIT_FAILED
+    - PLUGIN_EXECUTE_FAILED
+    - PLUGIN_MISSING_SERVICES
+    # Service errors
+    - SERVICE_NOT_REGISTERED
+    - SERVICE_INIT_FAILED
+    - SERVICE_UNAVAILABLE
+    # LLM errors
+    - LLM_MODEL_NOT_FOUND
+    - LLM_GENERATION_FAILED
+    - LLM_STREAM_FAILED
+    - LLM_TOOL_EXECUTION_FAILED
+    # RAG errors
+    - RAG_SEARCH_FAILED
+    - RAG_INDEX_FAILED
+    - RAG_NO_RESULTS
+    # Auth errors
+    - AUTH_USER_NOT_FOUND
+    - AUTH_TOKEN_INVALID
+    - AUTH_TOKEN_EXPIRED
+    - AUTH_PERMISSION_DENIED
+    # Data errors
+    - DATA_NOT_FOUND
+    - DATA_WRITE_FAILED
+    - DATA_DELETE_FAILED
+    - DATA_QUERY_FAILED
+    # Cache errors
+    - CACHE_GET_FAILED
+    - CACHE_SET_FAILED
+    - CACHE_DELETE_FAILED
+    # Calendar errors
+    - CALENDAR_EVENT_CREATE_FAILED
+    - CALENDAR_EVENT_NOT_FOUND
+    - CALENDAR_LIST_FAILED
+    # Event errors
+    - EVENT_HANDLER_NOT_FOUND
+    - EVENT_MAPPING_NOT_FOUND
+    - EVENT_PROCESSING_FAILED
+    # Config errors
+    - CONFIG_LOAD_FAILED
+    - CONFIG_INVALID
+    - CONFIG_MISSING_REQUIRED
+    # Environment errors
+    - ENV_MISSING
+    - ENV_INVALID
+    # Discord errors
+    - DISCORD_CONNECTION_FAILED
+    - DISCORD_MESSAGE_SEND_FAILED
+    - DISCORD_COMMAND_REGISTER_FAILED
+
+# =============================================================================
+# Registered Plugins
+# =============================================================================
+
+Plugins:
+  chat:
+    id: chat
+    name: Chat & Conversation
+    version: 1.0.0
+    required_services:
+      - llm
+    optional_services:
+      - rag
+      - cache
+    config:
+      model: string?           # LLMモデル名
+      use_rag: boolean?        # RAG使用フラグ
+      rag_top_k: number?       # RAG取得件数
+      temperature: number?     # 温度パラメータ
+      max_tokens: number?      # 最大トークン数
+      system_prompt: string?   # システムプロンプト
+      cache_ttl_seconds: number?  # キャッシュTTL
+
+  attendance:
+    id: attendance
+    name: Attendance Management
+    version: 1.0.0
+    required_services:
+      - data
+    config:
+      collection_name: string?  # Firestoreコレクション名
+
+  calendar:
+    id: calendar
+    name: Calendar Integration
+    version: 1.0.0
+    required_services:
+      - calendar
+    config:
+      calendar_id: string?  # Google Calendar ID
+      timezone: string?     # タイムゾーン
+
+  reminder:
+    id: reminder
+    name: Reminder Notifications
+    version: 1.0.0
+    required_services: []
+    config:
+      message: string?      # リマインダーメッセージ
+      channel_id: string?   # 送信先チャンネルID
+
+  recording:
+    id: recording
+    name: Voice Recording
+    version: 1.0.0
+    required_services: []
+    optional_services:
+      - storage
+    config:
+      output_dir: string?           # 出力ディレクトリ
+      max_duration_seconds: number? # 最大録音時間（秒）
+      upload_to_storage: boolean?   # Storageへアップロード
+      storage_bucket: string?       # Storage バケット名
+
+  transcription:
+    id: transcription
+    name: Voice Transcription
+    version: 1.0.0
+    required_services: []
+    optional_services:
+      - data
+    config:
+      model: string?           # Whisperモデル（whisper-1）
+      language: string?        # 言語コード（ja, en等）
+      response_format: string? # レスポンス形式（json, text, verbose_json）
+      save_to_database: boolean?  # データベースに保存
+      collection_name: string?    # Firestoreコレクション名
+
+# =============================================================================
+# Domain Types - Recording
+# =============================================================================
+
+RecordingSession:
+  description: 録音セッション情報
+  fields:
+    connection: VoiceConnection  # Discord音声接続
+    streams: Map                 # ユーザーID -> AudioReceiveStream
+    file_paths: string[]         # 録音ファイルパス配列
+    start_time: Date             # 開始時刻
+    guild_id: string             # Guild ID
+    channel_id: string           # チャンネルID
+
+# =============================================================================
+# Domain Types - Transcription
+# =============================================================================
+
+TranscriptionResult:
+  description: 文字起こし結果
+  collection: transcriptions
+  fields:
+    id: string?                    # ドキュメントID
+    text: string                   # 文字起こしテキスト
+    language: string?              # 検出言語
+    duration_seconds: number?      # 音声の長さ（秒）
+    segments: TranscriptionSegment[]?  # セグメント配列
+    created_at: Date               # 作成日時
+
+TranscriptionSegment:
+  description: 文字起こしセグメント
+  fields:
+    start: number     # 開始時間（秒）
+    end: number       # 終了時間（秒）
+    text: string      # セグメントテキスト
+    speaker_id: string?  # 話者ID（オプション）

@@ -1,0 +1,38 @@
+{
+    "customer_id": "example",
+    "name": "Example Company",
+    "features": ["chat", "attendance"],
+    "event_mappings": [
+        {
+            "event_type": "slash",
+            "feature_id": "chat",
+            "config": {
+                "command_name": "chat",
+                "model": "gpt-4",
+                "use_rag": false,
+                "temperature": 0.7
+            }
+        },
+        {
+            "event_type": "mention",
+            "feature_id": "chat",
+            "config": {
+                "model": "gpt-4",
+                "use_rag": false,
+                "system_prompt": "You are a helpful assistant."
+            }
+        },
+        {
+            "event_type": "slash",
+            "feature_id": "attendance",
+            "config": {
+                "command_name": "attendance",
+                "collection_name": "attendance"
+            }
+        }
+    ],
+    "settings": {
+        "language": "ja",
+        "timezone": "Asia/Tokyo"
+    }
+}
