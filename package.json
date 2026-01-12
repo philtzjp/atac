@@ -2,14 +2,28 @@
     "name": "@philtzjp/atac",
     "version": "0.1.0",
     "description": "ATAC (Any To Any Connectivity) - Discord Bot Core Platform",
-    "main": "dist/main.js",
-    "types": "dist/main.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "homepage": "https://atac.one",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "GPL-3.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/philtzjp/atac"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
     },
     "scripts": {
         "build": "tsc",
