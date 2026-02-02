@@ -12,6 +12,13 @@ export { PollBuilder } from "./interaction/poll.js"
 // Voice
 export { VoiceRecorder } from "./voice/recorder.js"
 
+// Database
+export { Neo4jClient } from "./database/neo4j.js"
+export { SQLiteClient } from "./database/sqlite.js"
+
+// HTTP
+export { HttpClient } from "./http/client.js"
+
 // Environment
 export { loadEnvironment } from "./env/loader.js"
 
@@ -29,3 +36,5 @@ export type {
     RecordingSegment,
     ParticipantInfo,
 } from "./voice/types.js"
+export type { Neo4jConfig, SQLiteConfig, Neo4jTransaction } from "./database/types.js"
+export type { HttpClientConfig, RequestOptions, HttpResponse } from "./http/types.js"

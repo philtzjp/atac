@@ -14,6 +14,14 @@ const LOG_MESSAGES: Record<string, string> = {
     VOICE_CLEANUP_COMPLETED: "Old sessions cleanup completed",
     ENV_LOADED: "Environment variables loaded",
     SIGNAL_RECEIVED: "Shutdown signal received",
+    NEO4J_CONNECTED: "Connected to Neo4j",
+    NEO4J_DISCONNECTED: "Disconnected from Neo4j",
+    NEO4J_QUERY_EXECUTED: "Neo4j query executed",
+    SQLITE_CONNECTED: "SQLite database opened",
+    SQLITE_DISCONNECTED: "SQLite database closed",
+    SQLITE_QUERY_EXECUTED: "SQLite query executed",
+    HTTP_REQUEST_SENT: "HTTP request sent",
+    HTTP_RESPONSE_RECEIVED: "HTTP response received",
 }
 
 type LogLevel = "debug" | "info" | "warn" | "error"

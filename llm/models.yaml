@@ -186,6 +186,82 @@ VoiceRecorder:
     cleanupOldSessions: (recordings_dir: string, max_age_days: number) => Promise<number>
 
 # =============================================================================
+# Database Types
+# =============================================================================
+
+Neo4jConfig:
+  description: Neo4j接続設定
+  fields:
+    uri: string                # bolt://localhost:7687
+    username: string           # 認証ユーザー名
+    password: string           # 認証パスワード
+    database: string?          # データベース名（デフォルト: "neo4j"）
+
+SQLiteConfig:
+  description: SQLite接続設定
+  fields:
+    path: string               # DBファイルパス
+    wal_mode: boolean?         # WALモード有効化（デフォルト: true）
+
+Neo4jClient:
+  description: Neo4jデータベースクライアント
+  constructor: (config: Neo4jConfig)
+  methods:
+    connect: () => Promise<void>
+    disconnect: () => Promise<void>
+    query: <T>(cypher: string, params?: Record<string, unknown>) => Promise<T[]>
+    queryOne: <T>(cypher: string, params?: Record<string, unknown>) => Promise<T | null>
+    transaction: <T>(work: (tx: Neo4jTransaction) => Promise<T>) => Promise<T>
+
+SQLiteClient:
+  description: SQLiteデータベースクライアント
+  constructor: (config: SQLiteConfig)
+  methods:
+    connect: () => void
+    disconnect: () => void
+    query: <T>(sql: string, params?: unknown[]) => T[]
+    queryOne: <T>(sql: string, params?: unknown[]) => T | undefined
+    execute: (sql: string, params?: unknown[]) => RunResult
+    transaction: <T>(work: () => T) => T
+
+# =============================================================================
+# HTTP Types
+# =============================================================================
+
+HttpClientConfig:
+  description: HTTPクライアント設定
+  fields:
+    base_url: string           # ベースURL
+    headers: Record<string, string>?  # デフォルトヘッダー
+    bearer_token: string?      # Bearer認証トークン
+    timeout_ms: number?        # タイムアウト（デフォルト: 30000ms）
+
+RequestOptions:
+  description: リクエストオプション
+  fields:
+    headers: Record<string, string>?  # 追加ヘッダー
+    timeout_ms: number?        # タイムアウト上書き
+    params: Record<string, string>?   # クエリパラメータ
+
+HttpResponse:
+  description: HTTPレスポンス
+  generic: T
+  fields:
+    status: number             # ステータスコード
+    headers: Headers           # レスポンスヘッダー
+    data: T                    # レスポンスボディ
+
+HttpClient:
+  description: HTTPクライアント（native fetch使用）
+  constructor: (config: HttpClientConfig)
+  methods:
+    get: <T>(path: string, options?: RequestOptions) => Promise<HttpResponse<T>>
+    post: <T>(path: string, body?: unknown, options?: RequestOptions) => Promise<HttpResponse<T>>
+    put: <T>(path: string, body?: unknown, options?: RequestOptions) => Promise<HttpResponse<T>>
+    patch: <T>(path: string, body?: unknown, options?: RequestOptions) => Promise<HttpResponse<T>>
+    delete: <T>(path: string, options?: RequestOptions) => Promise<HttpResponse<T>>
+
+# =============================================================================
 # Environment
 # =============================================================================
 
@@ -234,6 +310,20 @@ ErrorCode:
     - VOICE_NOT_RECORDING
     - VOICE_RECORDING_FAILED
     - VOICE_CLEANUP_FAILED
+    # Neo4j errors
+    - NEO4J_CONNECTION_FAILED
+    - NEO4J_QUERY_FAILED
+    - NEO4J_TRANSACTION_FAILED
+    - NEO4J_NOT_CONNECTED
+    # SQLite errors
+    - SQLITE_CONNECTION_FAILED
+    - SQLITE_QUERY_FAILED
+    - SQLITE_TRANSACTION_FAILED
+    - SQLITE_NOT_CONNECTED
+    # HTTP errors
+    - HTTP_REQUEST_FAILED
+    - HTTP_TIMEOUT
+    - HTTP_INVALID_RESPONSE
 
 # =============================================================================
 # Logger
@@ -266,6 +356,17 @@ LogMessages:
     - VOICE_CLEANUP_COMPLETED
     - ENV_LOADED
     - SIGNAL_RECEIVED
+    # Neo4j logs
+    - NEO4J_CONNECTED
+    - NEO4J_DISCONNECTED
+    - NEO4J_QUERY_EXECUTED
+    # SQLite logs
+    - SQLITE_CONNECTED
+    - SQLITE_DISCONNECTED
+    - SQLITE_QUERY_EXECUTED
+    # HTTP logs
+    - HTTP_REQUEST_SENT
+    - HTTP_RESPONSE_RECEIVED
 
 # =============================================================================
 # Environment Variables
@@ -277,3 +378,7 @@ EnvironmentVariables:
     DISCORD_TOKEN: string        # Discord Bot Token（必須）
     DISCORD_CLIENT_ID: string    # Discord Application Client ID（必須）
     DISCORD_GUILD_ID: string?    # 開発用Guild ID（任意）
+    NEO4J_URI: string?           # Neo4j接続URI（任意、例: bolt://localhost:7687）
+    NEO4J_USERNAME: string?      # Neo4j認証ユーザー名（任意）
+    NEO4J_PASSWORD: string?      # Neo4j認証パスワード（任意）
+    NEO4J_DATABASE: string?      # Neo4jデータベース名（任意、デフォルト: "neo4j"）

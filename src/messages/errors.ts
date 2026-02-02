@@ -19,6 +19,17 @@ const ERROR_MESSAGES: Record<string, string> = {
     VOICE_NOT_RECORDING: "No recording is in progress",
     VOICE_RECORDING_FAILED: "Recording failed",
     VOICE_CLEANUP_FAILED: "Failed to cleanup old sessions",
+    NEO4J_CONNECTION_FAILED: "Failed to connect to Neo4j",
+    NEO4J_QUERY_FAILED: "Neo4j query execution failed",
+    NEO4J_TRANSACTION_FAILED: "Neo4j transaction failed",
+    NEO4J_NOT_CONNECTED: "Neo4j client is not connected",
+    SQLITE_CONNECTION_FAILED: "Failed to open SQLite database",
+    SQLITE_QUERY_FAILED: "SQLite query execution failed",
+    SQLITE_TRANSACTION_FAILED: "SQLite transaction failed",
+    SQLITE_NOT_CONNECTED: "SQLite client is not connected",
+    HTTP_REQUEST_FAILED: "HTTP request failed",
+    HTTP_TIMEOUT: "HTTP request timed out",
+    HTTP_INVALID_RESPONSE: "Invalid HTTP response",
 }
 
 export class ATACError extends Error {
