@@ -24,7 +24,7 @@ const LOG_MESSAGES: Record<string, string> = {
     HTTP_RESPONSE_RECEIVED: "HTTP response received",
 }
 
-type LogLevel = "debug" | "info" | "warn" | "error"
+import type { LogLevel } from "../types/logger.js"
 
 export class Logger {
     private readonly prefix: string
@@ -50,7 +50,10 @@ export class Logger {
     }
 
     private log(level: LogLevel, message_key: string, meta?: Record<string, unknown>): void {
-        const resolved_message = LOG_MESSAGES[message_key] ?? message_key
+        const resolved_message = LOG_MESSAGES[message_key]
+        if (!resolved_message) {
+            throw new Error(`Unregistered log message key: ${message_key}`)
+        }
         const timestamp = new Date().toISOString()
         const formatted = `${timestamp} ${this.prefix} [${level.toUpperCase()}] ${resolved_message}`
 

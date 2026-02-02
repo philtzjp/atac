@@ -1,9 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js"
-
-interface PollOption {
-    custom_id: string
-    label: string
-}
+import type { PollOption } from "../types/poll.js"
 
 export class PollBuilder {
     private readonly question: string
@@ -27,7 +23,7 @@ export class PollBuilder {
         let current_row = new ActionRowBuilder<ButtonBuilder>()
         let buttons_in_row = 0
 
-        for (const opt of this.options) {
+        for (const poll_option of this.options) {
             if (buttons_in_row >= 5) {
                 rows.push(current_row)
                 current_row = new ActionRowBuilder<ButtonBuilder>()
@@ -36,8 +32,8 @@ export class PollBuilder {
 
             current_row.addComponents(
                 new ButtonBuilder()
-                    .setCustomId(opt.custom_id)
-                    .setLabel(opt.label)
+                    .setCustomId(poll_option.custom_id)
+                    .setLabel(poll_option.label)
                     .setStyle(ButtonStyle.Primary)
             )
             buttons_in_row++

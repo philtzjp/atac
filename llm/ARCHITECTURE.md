@@ -19,21 +19,23 @@ src/
 │   ├── embed.ts             # EmbedHelper
 │   └── poll.ts              # PollBuilder
 ├── voice/
-│   ├── recorder.ts          # VoiceRecorder
-│   └── types.ts             # 録音関連型
+│   └── recorder.ts          # VoiceRecorder
 ├── database/
-│   ├── types.ts             # Neo4jConfig, SQLiteConfig, Neo4jTransaction
 │   ├── neo4j.ts             # Neo4jClient
 │   └── sqlite.ts            # SQLiteClient
 ├── http/
-│   ├── types.ts             # HttpClientConfig, RequestOptions, HttpResponse
 │   └── client.ts            # HttpClient
 ├── env/
 │   └── loader.ts            # loadEnvironment()
 ├── types/
 │   ├── bot.ts               # BotConfig, BotActivity, BotStartOptions, BotClient
 │   ├── command.ts           # Command, ButtonHandler
-│   └── listener.ts          # Listener
+│   ├── listener.ts          # Listener
+│   ├── voice.ts             # VoiceRecorderConfig, RecordingSession, RecordingSegment, ParticipantInfo
+│   ├── poll.ts              # PollOption
+│   ├── logger.ts            # LogLevel
+│   ├── database.ts          # Neo4jConfig, SQLiteConfig, Neo4jTransaction
+│   └── http.ts              # HttpClientConfig, RequestOptions, HttpResponse
 └── messages/
     ├── errors.ts            # ATACError, createError, エラーコード定義
     └── logger.ts            # Logger, ログメッセージ定義

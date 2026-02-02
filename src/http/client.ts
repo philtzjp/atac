@@ -1,6 +1,6 @@
 import { createError } from "../messages/errors.js"
 import { Logger } from "../messages/logger.js"
-import type { HttpClientConfig, HttpResponse, RequestOptions } from "./types.js"
+import type { HttpClientConfig, HttpResponse, RequestOptions } from "../types/http.js"
 
 const logger = new Logger("HTTP")
 
@@ -46,7 +46,7 @@ export class HttpClient {
         options?: RequestOptions
     ): Promise<HttpResponse<T>> {
         const url = this.buildUrl(path, options?.params)
-        const timeout_ms = options?.timeout_ms ?? this.config.timeout_ms ?? 30000
+        const timeout_ms = options?.timeout_ms ?? this.config.timeout_ms
         const headers = this.buildHeaders(options?.headers)
 
         const controller = new AbortController()

@@ -16,7 +16,7 @@ import type {
     RecordingSession,
     RecordingSegment,
     ParticipantInfo,
-} from "./types.js"
+} from "../types/voice.js"
 import { ATACError } from "../messages/errors.js"
 import { Logger } from "../messages/logger.js"
 
@@ -40,7 +40,7 @@ export class VoiceRecorder {
     async join(member: GuildMember): Promise<void> {
         const channel = member.voice.channel
         if (!channel) {
-            throw new ATACError("VOICE_JOIN_FAILED", { reason: "Member is not in a voice channel" })
+            throw new ATACError("VOICE_MEMBER_NOT_IN_CHANNEL")
         }
 
         try {
@@ -163,6 +163,16 @@ export class VoiceRecorder {
 
         const write_stream = createWriteStream(file_path)
 
+        if (!this.participants.has(user_id)) {
+            this.participants.set(user_id, {
+                user_id,
+                username: user_id,
+                joined_at: new Date().toISOString(),
+            })
+        }
+
+        const participant = this.participants.get(user_id)!
+
         pipeline(opus_stream, decode_transform, write_stream, (error): void => {
             if (error && this.is_recording) {
                 logger.error("VOICE_RECORDING_FAILED", {
@@ -175,7 +185,7 @@ export class VoiceRecorder {
             this.segments.push({
                 file_path,
                 user_id,
-                username: this.participants.get(user_id)?.username ?? user_id,
+                username: participant.username,
                 started_at: segment_start,
                 duration_ms,
             })
@@ -184,7 +194,17 @@ export class VoiceRecorder {
             appendFile(
                 segments_jsonl_path,
                 JSON.stringify(this.segments[this.segments.length - 1]) + "\n"
-            ).catch(() => {})
+            ).then(
+                () => {
+                    // 書き込み成功
+                },
+                append_error => {
+                    logger.error("VOICE_RECORDING_FAILED", {
+                        user_id,
+                        error: String(append_error),
+                    })
+                }
+            )
 
             this.active_streams.delete(user_id)
 
@@ -200,14 +220,6 @@ export class VoiceRecorder {
                 opus_stream.destroy()
             },
         })
-
-        if (!this.participants.has(user_id)) {
-            this.participants.set(user_id, {
-                user_id,
-                username: user_id,
-                joined_at: new Date().toISOString(),
-            })
-        }
     }
 
     static async cleanupOldSessions(recordings_dir: string, max_age_days: number): Promise<number> {

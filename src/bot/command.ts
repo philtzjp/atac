@@ -17,7 +17,7 @@ export class CommandRegistry {
     }
 
     getDefinitions(): Command["definition"][] {
-        return Array.from(this.commands.values()).map(cmd => cmd.definition)
+        return Array.from(this.commands.values()).map(command => command.definition)
     }
 
     async deployToGuild(token: string, client_id: string, guild_id: string): Promise<void> {

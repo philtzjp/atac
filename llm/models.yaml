@@ -129,6 +129,12 @@ EmbedHelper:
     setTimestamp: () => EmbedHelper
     build: () => EmbedBuilder
 
+PollOption:
+  description: 投票選択肢
+  fields:
+    custom_id: string          # ボタンカスタムID
+    label: string              # ボタンラベル
+
 PollBuilder:
   description: アンケート/投票ビルダー（ボタンベース）
   constructor: (question: string)
@@ -195,13 +201,13 @@ Neo4jConfig:
     uri: string                # bolt://localhost:7687
     username: string           # 認証ユーザー名
     password: string           # 認証パスワード
-    database: string?          # データベース名（デフォルト: "neo4j"）
+    database: string           # データベース名
 
 SQLiteConfig:
   description: SQLite接続設定
   fields:
     path: string               # DBファイルパス
-    wal_mode: boolean?         # WALモード有効化（デフォルト: true）
+    wal_mode: boolean          # WALモード有効化
 
 Neo4jClient:
   description: Neo4jデータベースクライアント
@@ -234,7 +240,7 @@ HttpClientConfig:
     base_url: string           # ベースURL
     headers: Record<string, string>?  # デフォルトヘッダー
     bearer_token: string?      # Bearer認証トークン
-    timeout_ms: number?        # タイムアウト（デフォルト: 30000ms）
+    timeout_ms: number         # タイムアウト（ミリ秒）
 
 RequestOptions:
   description: リクエストオプション
@@ -303,6 +309,7 @@ ErrorCode:
     - REPLY_ALREADY_SENT
     - REPLY_SEND_FAILED
     # Voice errors
+    - VOICE_MEMBER_NOT_IN_CHANNEL
     - VOICE_JOIN_FAILED
     - VOICE_LEAVE_FAILED
     - VOICE_NOT_CONNECTED
@@ -328,6 +335,10 @@ ErrorCode:
 # =============================================================================
 # Logger
 # =============================================================================
+
+LogLevel:
+  description: ログレベル
+  type: "debug" | "info" | "warn" | "error"
 
 Logger:
   description: 構造化ログ出力

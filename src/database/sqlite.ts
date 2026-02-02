@@ -1,13 +1,13 @@
 import Database, { type RunResult } from "better-sqlite3"
 import { createError } from "../messages/errors.js"
 import { Logger } from "../messages/logger.js"
-import type { SQLiteConfig } from "./types.js"
+import type { SQLiteConfig } from "../types/database.js"
 
 const logger = new Logger("SQLite")
 
 export class SQLiteClient {
     private readonly config: SQLiteConfig
-    private db: Database.Database | null = null
+    private database: Database.Database | null = null
 
     constructor(config: SQLiteConfig) {
         this.config = config
@@ -15,14 +15,13 @@ export class SQLiteClient {
 
     connect(): void {
         try {
-            this.db = new Database(this.config.path)
-            const wal_mode = this.config.wal_mode ?? true
-            if (wal_mode) {
-                this.db.pragma("journal_mode = WAL")
+            this.database = new Database(this.config.path)
+            if (this.config.wal_mode) {
+                this.database.pragma("journal_mode = WAL")
             }
             logger.info("SQLITE_CONNECTED", { path: this.config.path })
         } catch (error) {
-            this.db = null
+            this.database = null
             throw createError("SQLITE_CONNECTION_FAILED", {
                 path: this.config.path,
                 cause: error instanceof Error ? error.message : String(error),
@@ -31,17 +30,17 @@ export class SQLiteClient {
     }
 
     disconnect(): void {
-        if (this.db) {
-            this.db.close()
-            this.db = null
+        if (this.database) {
+            this.database.close()
+            this.database = null
             logger.info("SQLITE_DISCONNECTED")
         }
     }
 
     query<T>(sql: string, params?: unknown[]): T[] {
-        const db = this.getDatabase()
+        const database = this.getDatabase()
         try {
-            const statement = db.prepare(sql)
+            const statement = database.prepare(sql)
             const result = params ? statement.all(...params) : statement.all()
             logger.debug("SQLITE_QUERY_EXECUTED", { sql })
             return result as T[]
@@ -54,9 +53,9 @@ export class SQLiteClient {
     }
 
     queryOne<T>(sql: string, params?: unknown[]): T | undefined {
-        const db = this.getDatabase()
+        const database = this.getDatabase()
         try {
-            const statement = db.prepare(sql)
+            const statement = database.prepare(sql)
             const result = params ? statement.get(...params) : statement.get()
             logger.debug("SQLITE_QUERY_EXECUTED", { sql })
             return result as T | undefined
@@ -69,9 +68,9 @@ export class SQLiteClient {
     }
 
     execute(sql: string, params?: unknown[]): RunResult {
-        const db = this.getDatabase()
+        const database = this.getDatabase()
         try {
-            const statement = db.prepare(sql)
+            const statement = database.prepare(sql)
             const result = params ? statement.run(...params) : statement.run()
             logger.debug("SQLITE_QUERY_EXECUTED", { sql })
             return result
@@ -84,9 +83,9 @@ export class SQLiteClient {
     }
 
     transaction<T>(work: () => T): T {
-        const db = this.getDatabase()
+        const database = this.getDatabase()
         try {
-            const transaction_fn = db.transaction(work)
+            const transaction_fn = database.transaction(work)
             return transaction_fn()
         } catch (error) {
             throw createError("SQLITE_TRANSACTION_FAILED", {
@@ -96,9 +95,9 @@ export class SQLiteClient {
     }
 
     private getDatabase(): Database.Database {
-        if (!this.db) {
+        if (!this.database) {
             throw createError("SQLITE_NOT_CONNECTED")
         }
-        return this.db
+        return this.database
     }
 }

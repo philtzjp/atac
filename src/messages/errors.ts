@@ -12,6 +12,7 @@ const ERROR_MESSAGES: Record<string, string> = {
     ENV_LOAD_FAILED: "Failed to load .env file",
     REPLY_ALREADY_SENT: "Reply has already been sent",
     REPLY_SEND_FAILED: "Failed to send reply",
+    VOICE_MEMBER_NOT_IN_CHANNEL: "Member is not in a voice channel",
     VOICE_JOIN_FAILED: "Failed to join voice channel",
     VOICE_LEAVE_FAILED: "Failed to leave voice channel",
     VOICE_NOT_CONNECTED: "Bot is not connected to a voice channel",
@@ -37,7 +38,10 @@ export class ATACError extends Error {
     readonly details: Record<string, unknown>
 
     constructor(code: string, details: Record<string, unknown> = {}) {
-        const base_message = ERROR_MESSAGES[code] ?? `Unknown error: ${code}`
+        const base_message = ERROR_MESSAGES[code]
+        if (!base_message) {
+            throw new Error(`Unregistered ATACError code: ${code}`)
+        }
         super(base_message)
         this.name = "ATACError"
         this.code = code

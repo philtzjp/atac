@@ -2,7 +2,7 @@ export interface HttpClientConfig {
     base_url: string
     headers?: Record<string, string>
     bearer_token?: string
-    timeout_ms?: number
+    timeout_ms: number
 }
 
 export interface RequestOptions {

@@ -1,7 +1,7 @@
 import neo4j, { type Driver, type Session } from "neo4j-driver"
 import { createError } from "../messages/errors.js"
 import { Logger } from "../messages/logger.js"
-import type { Neo4jConfig, Neo4jTransaction } from "./types.js"
+import type { Neo4jConfig, Neo4jTransaction } from "../types/database.js"
 
 const logger = new Logger("Neo4j")
 
@@ -78,7 +78,7 @@ export class Neo4jClient {
             throw createError("NEO4J_NOT_CONNECTED")
         }
         return this.driver.session({
-            database: this.config.database ?? "neo4j",
+            database: this.config.database,
         })
     }
 }

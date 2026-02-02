@@ -35,6 +35,8 @@ export type {
     RecordingSession,
     RecordingSegment,
     ParticipantInfo,
-} from "./voice/types.js"
-export type { Neo4jConfig, SQLiteConfig, Neo4jTransaction } from "./database/types.js"
-export type { HttpClientConfig, RequestOptions, HttpResponse } from "./http/types.js"
+} from "./types/voice.js"
+export type { Neo4jConfig, SQLiteConfig, Neo4jTransaction } from "./types/database.js"
+export type { HttpClientConfig, RequestOptions, HttpResponse } from "./types/http.js"
+export type { PollOption } from "./types/poll.js"
+export type { LogLevel } from "./types/logger.js"
