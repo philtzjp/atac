@@ -2,7 +2,9 @@
 1. このプロジェクト名は`ATAC Core`である。
 2. 完成したら、npm organization`philtzjp`で公開され、インストール時の名前は`@philtzjp/atac`となる。
 3. ホームページは`https://atac.one`である。
-4. 製作者は`Arata Ouchi (Original SIN Architecture)`である。
+4. 製作者は`Arata Ouchi (Philtz)`である。
+5. 製作者のX（Twitter）アカウントのURLは`https://x.com/ouchiarata`である。
+6. 製作者のホームページURLは`https://philtz.com`である。
 
 # コード規則
 1. 変数名は`snake_case`、関数名は`camelCase`、型名は`PascalCase`、環境変数は`CONTACT_CASE`

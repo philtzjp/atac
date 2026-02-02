@@ -17,14 +17,15 @@
         "LICENSE"
     ],
     "homepage": "https://atac.one",
-    "author": "Arata Ouchi (Original SIN Architecture)",
+    "author": "Arata Ouchi (Philtz)",
     "license": "MPL-2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/philtzjp/atac"
     },
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
+        "access": "public",
+        "registry": "https://registry.npmjs.org"
     },
     "scripts": {
         "build": "tsc",
