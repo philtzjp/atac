@@ -386,10 +386,23 @@ LogMessages:
 EnvironmentVariables:
   description: 必要な環境変数一覧
   variables:
+    # Discord
     DISCORD_TOKEN: string        # Discord Bot Token（必須）
     DISCORD_CLIENT_ID: string    # Discord Application Client ID（必須）
     DISCORD_GUILD_ID: string?    # 開発用Guild ID（任意）
-    NEO4J_URI: string?           # Neo4j接続URI（任意、例: bolt://localhost:7687）
-    NEO4J_USERNAME: string?      # Neo4j認証ユーザー名（任意）
-    NEO4J_PASSWORD: string?      # Neo4j認証パスワード（任意）
-    NEO4J_DATABASE: string?      # Neo4jデータベース名（任意、デフォルト: "neo4j"）
+    # Neo4j
+    NEO4J_URI: string?           # Neo4j接続URI（例: bolt://localhost:7687）
+    NEO4J_USERNAME: string?      # Neo4j認証ユーザー名
+    NEO4J_PASSWORD: string?      # Neo4j認証パスワード
+    NEO4J_DATABASE: string?      # Neo4jデータベース名
+    # SQLite
+    SQLITE_PATH: string?         # SQLiteデータベースファイルパス（例: ./data/bot.db）
+    SQLITE_WAL_MODE: string?     # WALモード有効化（"true" / "false"）
+    # Voice Recording
+    VOICE_RECORDINGS_DIR: string?  # 録音保存ディレクトリ（例: ./recordings）
+    VOICE_AFTER_SILENCE_MS: string?  # 無音タイムアウト（ミリ秒）
+    VOICE_SEGMENT_SECONDS: string?   # セグメント長（秒）
+    # HTTP Client
+    HTTP_BASE_URL: string?       # HTTPクライアントのベースURL
+    HTTP_BEARER_TOKEN: string?   # Bearer認証トークン
+    HTTP_TIMEOUT_MS: string?     # タイムアウト（ミリ秒）
