@@ -1,0 +1,55 @@
+const LOG_MESSAGES: Record<string, string> = {
+    BOT_STARTING: "Bot is starting...",
+    BOT_READY: "Bot is ready",
+    BOT_STOPPED: "Bot has been stopped",
+    COMMAND_REGISTERED: "Slash commands registered",
+    COMMAND_EXECUTED: "Command executed",
+    BUTTON_EXECUTED: "Button handler executed",
+    LISTENER_TRIGGERED: "Listener triggered",
+    VOICE_JOINED: "Joined voice channel",
+    VOICE_LEFT: "Left voice channel",
+    VOICE_RECORDING_STARTED: "Recording started",
+    VOICE_RECORDING_STOPPED: "Recording stopped",
+    VOICE_SEGMENT_SAVED: "Voice segment saved",
+    VOICE_CLEANUP_COMPLETED: "Old sessions cleanup completed",
+    ENV_LOADED: "Environment variables loaded",
+    SIGNAL_RECEIVED: "Shutdown signal received",
+}
+
+type LogLevel = "debug" | "info" | "warn" | "error"
+
+export class Logger {
+    private readonly prefix: string
+
+    constructor(name: string) {
+        this.prefix = `[ATAC:${name}]`
+    }
+
+    debug(message_key: string, meta?: Record<string, unknown>): void {
+        this.log("debug", message_key, meta)
+    }
+
+    info(message_key: string, meta?: Record<string, unknown>): void {
+        this.log("info", message_key, meta)
+    }
+
+    warn(message_key: string, meta?: Record<string, unknown>): void {
+        this.log("warn", message_key, meta)
+    }
+
+    error(message_key: string, meta?: Record<string, unknown>): void {
+        this.log("error", message_key, meta)
+    }
+
+    private log(level: LogLevel, message_key: string, meta?: Record<string, unknown>): void {
+        const resolved_message = LOG_MESSAGES[message_key] ?? message_key
+        const timestamp = new Date().toISOString()
+        const formatted = `${timestamp} ${this.prefix} [${level.toUpperCase()}] ${resolved_message}`
+
+        if (meta && Object.keys(meta).length > 0) {
+            console[level](formatted, meta)
+        } else {
+            console[level](formatted)
+        }
+    }
+}

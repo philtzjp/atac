@@ -1,0 +1,39 @@
+const ERROR_MESSAGES: Record<string, string> = {
+    BOT_ALREADY_STARTED: "Bot is already started",
+    BOT_NOT_STARTED: "Bot has not been started",
+    BOT_START_FAILED: "Failed to start bot",
+    COMMAND_NOT_FOUND: "Command not found",
+    COMMAND_EXECUTION_FAILED: "Command execution failed",
+    COMMAND_REGISTER_FAILED: "Failed to register slash commands",
+    BUTTON_HANDLER_NOT_FOUND: "No button handler matched the interaction",
+    BUTTON_EXECUTION_FAILED: "Button handler execution failed",
+    LISTENER_EXECUTION_FAILED: "Listener execution failed",
+    ENV_VALIDATION_FAILED: "Environment variable validation failed",
+    ENV_LOAD_FAILED: "Failed to load .env file",
+    REPLY_ALREADY_SENT: "Reply has already been sent",
+    REPLY_SEND_FAILED: "Failed to send reply",
+    VOICE_JOIN_FAILED: "Failed to join voice channel",
+    VOICE_LEAVE_FAILED: "Failed to leave voice channel",
+    VOICE_NOT_CONNECTED: "Bot is not connected to a voice channel",
+    VOICE_ALREADY_RECORDING: "Recording is already in progress",
+    VOICE_NOT_RECORDING: "No recording is in progress",
+    VOICE_RECORDING_FAILED: "Recording failed",
+    VOICE_CLEANUP_FAILED: "Failed to cleanup old sessions",
+}
+
+export class ATACError extends Error {
+    readonly code: string
+    readonly details: Record<string, unknown>
+
+    constructor(code: string, details: Record<string, unknown> = {}) {
+        const base_message = ERROR_MESSAGES[code] ?? `Unknown error: ${code}`
+        super(base_message)
+        this.name = "ATACError"
+        this.code = code
+        this.details = details
+    }
+}
+
+export function createError(code: string, details: Record<string, unknown> = {}): ATACError {
+    return new ATACError(code, details)
+}

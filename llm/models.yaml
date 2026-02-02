@@ -3,263 +3,195 @@
 # 実装が変更されたら、このファイルも必ず更新してください。
 
 # =============================================================================
-# Event Types
+# Bot Types
 # =============================================================================
 
-EventType:
-  description: イベントタイプの定義
-  values:
-    - slash      # Discordスラッシュコマンド
-    - mention    # ボットへのメンション
-    - reply      # ボットメッセージへのリプライ
-    - cron       # スケジュール実行
-    - webhook    # 外部Webhook
-
-EventContext:
-  description: すべてのイベントハンドラーに渡される共通コンテキスト
+BotConfig:
+  description: Bot作成時の設定
   fields:
-    customer_id: string    # 顧客ID
-    guild_id: string       # Discord Guild ID
-    user_id: string        # ユーザーID
-    channel_id: string     # チャンネルID
-    type: EventType        # イベントタイプ
-    payload: object        # イベント固有のペイロード
-    timestamp: Date        # タイムスタンプ
+    name: string               # Bot名
+    intents: GatewayIntentBits[]  # Discord Intents
+    activity: BotActivity?     # アクティビティ設定
 
-EventMapping:
-  description: イベントタイプとプラグインの対応付け
+BotActivity:
+  description: Botのアクティビティ表示
   fields:
-    event_type: EventType  # イベントタイプ
-    feature_id: string     # プラグインID
-    config: object         # プラグイン設定
+    name: string               # アクティビティ名
+    type: ActivityType         # アクティビティタイプ
 
-DiscordResponse:
-  description: Discordレスポンス構造
+BotStartOptions:
+  description: Bot起動時のオプション
   fields:
-    message: string?       # テキストメッセージ
-    embeds: Embed[]?       # Embedオブジェクト配列
-    components: ActionRowBuilder[]?  # コンポーネント配列
-    files: AttachmentBuilder[]?      # ファイル添付
+    token: string              # Discord Bot Token
+    client_id: string          # Discord Application Client ID
+    guild_id: string?          # Guild ID（指定時はギルドコマンドとして登録）
+
+BotClient:
+  description: createBot()が返すBotインスタンス
+  methods:
+    command: (command: Command) => void
+    listener: (listener: Listener) => void
+    button: (pattern: string, handler: ButtonHandler) => void
+    start: (options: BotStartOptions) => Promise<void>
+    destroy: () => Promise<void>
+  properties:
+    client: Client             # Discord.js Client（読み取り専用）
 
 # =============================================================================
-# Customer Types
+# Command Types
 # =============================================================================
 
-CustomerConfig:
-  description: 顧客ごとの機能セットとイベントマッピングを定義
+Command:
+  description: スラッシュコマンド定義
   fields:
-    customer_id: string         # 顧客ID
-    name: string                # 顧客名
-    features: string[]          # 有効なプラグインID配列
-    event_mappings: EventMapping[]  # イベントマッピング配列
-    settings: object            # カスタム設定
+    definition: RESTPostAPIChatInputApplicationCommandsJSONBody  # コマンド定義JSON
+    execute: (interaction: ChatInputCommandInteraction) => Promise<void>  # 実行関数
 
-CustomerProfile:
-  description: 認証後のユーザー情報
-  fields:
-    customer_id: string    # 顧客ID
-    name: string           # 顧客名
-    email: string?         # メールアドレス
-    plan: CustomerPlan     # プランタイプ
-    created_at: Date       # 作成日時
-    updated_at: Date       # 更新日時
+ButtonHandler:
+  description: ボタンインタラクションハンドラー
+  type: (interaction: ButtonInteraction) => Promise<void>
 
-CustomerPlan:
-  description: 顧客プランタイプ
-  values:
-    - free        # 無料プラン
-    - basic       # ベーシックプラン
-    - enterprise  # エンタープライズプラン
+CommandRegistry:
+  description: コマンド管理レジストリ
+  methods:
+    register: (command: Command) => void
+    get: (name: string) => Command | undefined
+    getDefinitions: () => Command["definition"][]
+    deployToGuild: (token: string, client_id: string, guild_id: string) => Promise<void>
+    deployGlobal: (token: string, client_id: string) => Promise<void>
+
+ButtonRouter:
+  description: ボタンルーティング（customIdプレフィクスマッチ、ワイルドカード*対応）
+  methods:
+    register: (pattern: string, handler: ButtonHandler) => void
+    match: (custom_id: string) => ButtonHandler | undefined
 
 # =============================================================================
-# Plugin Types
+# Listener Types
 # =============================================================================
 
-PluginConfig:
-  description: プラグイン設定
+Listener:
+  description: 型安全なDiscordイベントリスナー
+  generic: E extends keyof ClientEvents
   fields:
-    id: string              # プラグインID
-    name: string            # プラグイン名
-    version: string         # バージョン
-    required_services: string[]  # 依存サービス配列
+    event: E                   # イベント名
+    execute: (...args: ClientEvents[E]) => Promise<void>  # 実行関数
 
-PluginContext:
-  description: プラグイン実行時に渡されるコンテキスト
-  extends: EventContext
-  fields:
-    services: ServiceContainer  # サービスコンテナ
-    config: object              # プラグイン設定
-    response: DiscordResponse   # レスポンスオブジェクト
-
-PluginMetadata:
-  description: プラグインレジストリに登録される情報
-  fields:
-    id: string                  # プラグインID
-    name: string                # プラグイン名
-    version: string             # バージョン
-    path: string                # モジュールパス
-    required_services: string[] # 依存サービス配列
-    description: string?        # 説明
-
-PluginStatus:
-  description: プラグインステータス
-  values:
-    - unloaded  # 未ロード
-    - loading   # ロード中
-    - loaded    # ロード済み
-    - error     # エラー
+ListenerRegistry:
+  description: リスナー管理レジストリ
+  methods:
+    register: (listener: Listener) => void
+    attachAll: (client: Client) => void
 
 # =============================================================================
-# Service Types - LLM
+# Interaction Types
 # =============================================================================
 
-LLMGenerateOptions:
-  description: LLM生成オプション
-  fields:
-    messages: CoreMessage[]  # メッセージ配列
-    model: string?           # モデル名
-    system: string?          # システムプロンプト
-    temperature: number?     # 温度パラメータ
-    max_tokens: number?      # 最大トークン数
+ReplyBuilder:
+  description: Discord応答ビルダー（fluent API）
+  methods:
+    from: (interaction: ChatInputCommandInteraction) => ReplyBuilder  # static
+    ephemeral: () => ReplyBuilder
+    content: (text: string) => ReplyBuilder
+    embed: (builder_fn: (embed: EmbedBuilder) => EmbedBuilder) => ReplyBuilder
+    addEmbed: (embed: EmbedBuilder) => ReplyBuilder
+    buttons: (builder_fn: (row: ButtonRowBuilder) => ButtonRowBuilder) => ReplyBuilder
+    send: () => Promise<void>
+    defer: () => Promise<void>
+    followUp: () => Promise<void>
 
-LLMResponse:
-  description: LLMレスポンス
-  fields:
-    text: string                     # 生成テキスト
-    finish_reason: FinishReason      # 終了理由
+ButtonRowBuilder:
+  description: ボタン行ビルダー
+  methods:
+    confirm: (custom_id: string, label: string) => ButtonRowBuilder
+    cancel: (custom_id: string, label: string) => ButtonRowBuilder
+    primary: (custom_id: string, label: string) => ButtonRowBuilder
+    secondary: (custom_id: string, label: string) => ButtonRowBuilder
+    link: (url: string, label: string) => ButtonRowBuilder
+    build: () => ActionRowBuilder<ButtonBuilder>
 
-FinishReason:
-  description: LLM生成終了理由
-  values:
-    - stop        # 正常終了
-    - length      # トークン制限
-    - tool-calls  # ツール呼び出し
-    - error       # エラー
+EmbedHelper:
+  description: Embed生成ヘルパー
+  static_methods:
+    info: (title: string, description: string) => EmbedBuilder
+    error: (title: string, description: string) => EmbedBuilder
+    warning: (title: string, description: string) => EmbedBuilder
+    success: (title: string, description: string) => EmbedBuilder
+    create: () => EmbedHelper
+  methods:
+    setTitle: (title: string) => EmbedHelper
+    setDescription: (description: string) => EmbedHelper
+    setColor: (color: number) => EmbedHelper
+    addField: (name: string, value: string, inline?: boolean) => EmbedHelper
+    setFooter: (text: string) => EmbedHelper
+    setThumbnail: (url: string) => EmbedHelper
+    setImage: (url: string) => EmbedHelper
+    setTimestamp: () => EmbedHelper
+    build: () => EmbedBuilder
 
-ToolDefinition:
-  description: ツール定義
-  fields:
-    name: string           # ツール名
-    description: string    # 説明
-    parameters: object     # パラメータスキーマ
-    execute: function      # 実行関数
-
-LLMToolCall:
-  description: LLMツール呼び出し
-  fields:
-    tool_name: string   # ツール名
-    args: object        # 引数
-    result: unknown?    # 実行結果
-
-LLMToolResponse:
-  description: LLMツールレスポンス
-  fields:
-    text: string              # 生成テキスト
-    tool_calls: LLMToolCall[] # ツール呼び出し配列
-
-# =============================================================================
-# Service Types - RAG
-# =============================================================================
-
-RAGOptions:
-  description: RAG検索オプション
-  fields:
-    top_k: number?       # 取得件数
-    min_score: number?   # 最小スコア
-    namespace: string?   # 名前空間
-
-RAGResult:
-  description: RAG検索結果
-  fields:
-    id: string           # ドキュメントID
-    content: string      # コンテンツ
-    score: number        # 類似度スコア
-    metadata: object?    # メタデータ
+PollBuilder:
+  description: アンケート/投票ビルダー（ボタンベース）
+  constructor: (question: string)
+  methods:
+    option: (custom_id: string, label: string) => PollBuilder
+    getQuestion: () => string
+    build: () => ActionRowBuilder<ButtonBuilder>[]
 
 # =============================================================================
-# Service Types - Data
+# Voice Types
 # =============================================================================
 
-QueryFilter:
-  description: Firestoreクエリフィルター
+VoiceRecorderConfig:
+  description: 録音設定
   fields:
-    field: string                  # フィールド名
-    operator: QueryOperator        # 演算子
-    value: unknown                 # 値
+    recordings_dir: string     # 録音保存ディレクトリ
+    after_silence_ms: number   # 無音タイムアウト（ミリ秒）
+    segment_seconds: number    # セグメント長（秒）
 
-QueryOperator:
-  description: クエリ演算子
-  values:
-    - "=="           # 等しい
-    - "!="           # 等しくない
-    - ">"            # より大きい
-    - "<"            # より小さい
-    - ">="           # 以上
-    - "<="           # 以下
-    - "in"           # 配列に含まれる
-    - "not-in"       # 配列に含まれない
-    - "array-contains"  # 配列が含む
-
-# =============================================================================
-# Service Types - Calendar
-# =============================================================================
-
-CalendarEvent:
-  description: カレンダーイベント
+RecordingSession:
+  description: 録音セッション結果
   fields:
-    id: string?           # イベントID
-    title: string         # タイトル
-    description: string?  # 説明
-    start_time: Date      # 開始時刻
-    end_time: Date        # 終了時刻
-    location: string?     # 場所
-    attendees: string[]?  # 参加者メールアドレス配列
+    session_id: string         # セッションID
+    session_dir: string        # セッションディレクトリパス
+    segments: RecordingSegment[]  # セグメント配列
+    participants_path: string  # participants.jsonパス
+    started_at: Date           # 開始時刻
+    stopped_at: Date           # 停止時刻
 
-ListEventsOptions:
-  description: カレンダーイベント一覧オプション
+RecordingSegment:
+  description: 録音セグメント
   fields:
-    calendar_id: string?   # カレンダーID
-    start_date: Date?      # 開始日
-    end_date: Date?        # 終了日
-    max_results: number?   # 最大取得件数
+    file_path: string          # ファイルパス
+    user_id: string            # ユーザーID
+    username: string           # ユーザー名
+    started_at: number         # 開始タイムスタンプ（ms）
+    duration_ms: number        # 長さ（ミリ秒）
 
-# =============================================================================
-# Service Types - Auth
-# =============================================================================
-
-UserProfile:
-  description: ユーザープロファイル（認証）
+ParticipantInfo:
+  description: 参加者情報
   fields:
-    uid: string            # ユーザーID
-    email: string?         # メールアドレス
-    display_name: string?  # 表示名
-    photo_url: string?     # プロフィール画像URL
-    verified: boolean      # メール認証済みフラグ
+    user_id: string            # ユーザーID
+    username: string           # ユーザー名
+    joined_at: string          # 参加時刻（ISO 8601）
+
+VoiceRecorder:
+  description: 通話録音基盤
+  constructor: (config: VoiceRecorderConfig)
+  methods:
+    join: (member: GuildMember) => Promise<void>
+    start: () => Promise<void>
+    stop: () => Promise<RecordingSession>
+    leave: () => Promise<void>
+  static_methods:
+    cleanupOldSessions: (recordings_dir: string, max_age_days: number) => Promise<number>
 
 # =============================================================================
-# Domain Types - Attendance
+# Environment
 # =============================================================================
 
-AttendanceRecord:
-  description: 勤怠レコード
-  collection: attendance
-  fields:
-    user_id: string           # ユーザーID
-    date: string              # 日付（YYYY-MM-DD）
-    check_in_time: Date?      # チェックイン時刻
-    check_out_time: Date?     # チェックアウト時刻
-    duration_minutes: number? # 勤務時間（分）
-    note: string?             # メモ
-
-# =============================================================================
-# Internal Types
-# =============================================================================
-
-ServiceEntry:
-  description: サービスエントリー（DIコンテナ用）
-  fields:
-    factory: function    # ファクトリ関数
-    instance: unknown?   # インスタンス
+loadEnvironment:
+  description: Zod環境変数ローダー（dotenvを読み込みZodスキーマでバリデーション）
+  signature: <T>(schema: z.ZodObject<T>) => z.infer<z.ZodObject<T>>
 
 # =============================================================================
 # Error Types
@@ -269,184 +201,71 @@ ATACError:
   description: ATACカスタムエラー
   extends: Error
   fields:
-    code: ErrorCode           # エラーコード
-    details: object?          # 詳細情報
+    code: string               # エラーコード
+    details: Record<string, unknown>  # 詳細情報
 
 ErrorCode:
   description: エラーコード一覧
   values:
-    # Customer errors
-    - CUSTOMER_NOT_FOUND
-    - CUSTOMER_CONFIG_INVALID
-    - CUSTOMER_UNAUTHORIZED
-    # Plugin errors
-    - PLUGIN_NOT_FOUND
-    - PLUGIN_NOT_LOADED
-    - PLUGIN_LOAD_FAILED
-    - PLUGIN_INIT_FAILED
-    - PLUGIN_EXECUTE_FAILED
-    - PLUGIN_MISSING_SERVICES
-    # Service errors
-    - SERVICE_NOT_REGISTERED
-    - SERVICE_INIT_FAILED
-    - SERVICE_UNAVAILABLE
-    # LLM errors
-    - LLM_MODEL_NOT_FOUND
-    - LLM_GENERATION_FAILED
-    - LLM_STREAM_FAILED
-    - LLM_TOOL_EXECUTION_FAILED
-    # RAG errors
-    - RAG_SEARCH_FAILED
-    - RAG_INDEX_FAILED
-    - RAG_NO_RESULTS
-    # Auth errors
-    - AUTH_USER_NOT_FOUND
-    - AUTH_TOKEN_INVALID
-    - AUTH_TOKEN_EXPIRED
-    - AUTH_PERMISSION_DENIED
-    # Data errors
-    - DATA_NOT_FOUND
-    - DATA_WRITE_FAILED
-    - DATA_DELETE_FAILED
-    - DATA_QUERY_FAILED
-    # Cache errors
-    - CACHE_GET_FAILED
-    - CACHE_SET_FAILED
-    - CACHE_DELETE_FAILED
-    # Calendar errors
-    - CALENDAR_EVENT_CREATE_FAILED
-    - CALENDAR_EVENT_NOT_FOUND
-    - CALENDAR_LIST_FAILED
-    # Event errors
-    - EVENT_HANDLER_NOT_FOUND
-    - EVENT_MAPPING_NOT_FOUND
-    - EVENT_PROCESSING_FAILED
-    # Config errors
-    - CONFIG_LOAD_FAILED
-    - CONFIG_INVALID
-    - CONFIG_MISSING_REQUIRED
+    # Bot errors
+    - BOT_ALREADY_STARTED
+    - BOT_NOT_STARTED
+    - BOT_START_FAILED
+    # Command errors
+    - COMMAND_NOT_FOUND
+    - COMMAND_EXECUTION_FAILED
+    - COMMAND_REGISTER_FAILED
+    # Button errors
+    - BUTTON_HANDLER_NOT_FOUND
+    - BUTTON_EXECUTION_FAILED
+    # Listener errors
+    - LISTENER_EXECUTION_FAILED
     # Environment errors
-    - ENV_MISSING
-    - ENV_INVALID
-    # Discord errors
-    - DISCORD_CONNECTION_FAILED
-    - DISCORD_MESSAGE_SEND_FAILED
-    - DISCORD_COMMAND_REGISTER_FAILED
+    - ENV_VALIDATION_FAILED
+    - ENV_LOAD_FAILED
+    # Reply errors
+    - REPLY_ALREADY_SENT
+    - REPLY_SEND_FAILED
+    # Voice errors
+    - VOICE_JOIN_FAILED
+    - VOICE_LEAVE_FAILED
+    - VOICE_NOT_CONNECTED
+    - VOICE_ALREADY_RECORDING
+    - VOICE_NOT_RECORDING
+    - VOICE_RECORDING_FAILED
+    - VOICE_CLEANUP_FAILED
 
 # =============================================================================
-# Registered Plugins
+# Logger
 # =============================================================================
 
-Plugins:
-  chat:
-    id: chat
-    name: Chat & Conversation
-    version: 1.0.0
-    required_services:
-      - llm
-    optional_services:
-      - rag
-      - cache
-    config:
-      model: string?           # LLMモデル名
-      use_rag: boolean?        # RAG使用フラグ
-      rag_top_k: number?       # RAG取得件数
-      temperature: number?     # 温度パラメータ
-      max_tokens: number?      # 最大トークン数
-      system_prompt: string?   # システムプロンプト
-      cache_ttl_seconds: number?  # キャッシュTTL
+Logger:
+  description: 構造化ログ出力
+  constructor: (name: string)
+  methods:
+    debug: (message_key: string, meta?: Record<string, unknown>) => void
+    info: (message_key: string, meta?: Record<string, unknown>) => void
+    warn: (message_key: string, meta?: Record<string, unknown>) => void
+    error: (message_key: string, meta?: Record<string, unknown>) => void
 
-  attendance:
-    id: attendance
-    name: Attendance Management
-    version: 1.0.0
-    required_services:
-      - data
-    config:
-      collection_name: string?  # Firestoreコレクション名
-
-  calendar:
-    id: calendar
-    name: Calendar Integration
-    version: 1.0.0
-    required_services:
-      - calendar
-    config:
-      calendar_id: string?  # Google Calendar ID
-      timezone: string?     # タイムゾーン
-
-  reminder:
-    id: reminder
-    name: Reminder Notifications
-    version: 1.0.0
-    required_services: []
-    config:
-      message: string?      # リマインダーメッセージ
-      channel_id: string?   # 送信先チャンネルID
-
-  recording:
-    id: recording
-    name: Voice Recording
-    version: 1.0.0
-    required_services: []
-    optional_services:
-      - storage
-    config:
-      output_dir: string?           # 出力ディレクトリ
-      max_duration_seconds: number? # 最大録音時間（秒）
-      upload_to_storage: boolean?   # Storageへアップロード
-      storage_bucket: string?       # Storage バケット名
-
-  transcription:
-    id: transcription
-    name: Voice Transcription
-    version: 1.0.0
-    required_services: []
-    optional_services:
-      - data
-    config:
-      model: string?           # Whisperモデル（whisper-1）
-      language: string?        # 言語コード（ja, en等）
-      response_format: string? # レスポンス形式（json, text, verbose_json）
-      save_to_database: boolean?  # データベースに保存
-      collection_name: string?    # Firestoreコレクション名
-
-# =============================================================================
-# Domain Types - Recording
-# =============================================================================
-
-RecordingSession:
-  description: 録音セッション情報
-  fields:
-    connection: VoiceConnection  # Discord音声接続
-    streams: Map                 # ユーザーID -> AudioReceiveStream
-    file_paths: string[]         # 録音ファイルパス配列
-    start_time: Date             # 開始時刻
-    guild_id: string             # Guild ID
-    channel_id: string           # チャンネルID
-
-# =============================================================================
-# Domain Types - Transcription
-# =============================================================================
-
-TranscriptionResult:
-  description: 文字起こし結果
-  collection: transcriptions
-  fields:
-    id: string?                    # ドキュメントID
-    text: string                   # 文字起こしテキスト
-    language: string?              # 検出言語
-    duration_seconds: number?      # 音声の長さ（秒）
-    segments: TranscriptionSegment[]?  # セグメント配列
-    created_at: Date               # 作成日時
-
-TranscriptionSegment:
-  description: 文字起こしセグメント
-  fields:
-    start: number     # 開始時間（秒）
-    end: number       # 終了時間（秒）
-    text: string      # セグメントテキスト
-    speaker_id: string?  # 話者ID（オプション）
+LogMessages:
+  description: ログメッセージ一覧
+  values:
+    - BOT_STARTING
+    - BOT_READY
+    - BOT_STOPPED
+    - COMMAND_REGISTERED
+    - COMMAND_EXECUTED
+    - BUTTON_EXECUTED
+    - LISTENER_TRIGGERED
+    - VOICE_JOINED
+    - VOICE_LEFT
+    - VOICE_RECORDING_STARTED
+    - VOICE_RECORDING_STOPPED
+    - VOICE_SEGMENT_SAVED
+    - VOICE_CLEANUP_COMPLETED
+    - ENV_LOADED
+    - SIGNAL_RECEIVED
 
 # =============================================================================
 # Environment Variables
@@ -455,27 +274,6 @@ TranscriptionSegment:
 EnvironmentVariables:
   description: 必要な環境変数一覧
   variables:
-    # Discord (Required)
-    DISCORD_TOKEN: string        # Discord Bot Token
-    DISCORD_CLIENT_ID: string    # Discord Application Client ID
-    DISCORD_GUILD_ID: string?    # 開発用Guild ID
-
-    # AI Services (Optional)
-    OPENAI_API_KEY: string?      # OpenAI API Key
-    ANTHROPIC_API_KEY: string?   # Anthropic API Key
-
-    # Pinecone Vector DB (Optional)
-    PINECONE_API_KEY: string?    # Pinecone API Key
-    PINECONE_INDEX_NAME: string? # Pinecone Index Name
-
-    # Upstash Redis (Optional)
-    REDIS_URL: string?           # Upstash Redis REST URL
-    REDIS_TOKEN: string?         # Upstash Redis REST Token
-
-    # Firebase (Optional)
-    FIREBASE_PROJECT_ID: string?    # Firebase Project ID
-    FIREBASE_PRIVATE_KEY: string?   # Firebase Service Account Private Key
-    FIREBASE_CLIENT_EMAIL: string?  # Firebase Service Account Email
-
-    # Google Calendar (Optional)
-    GOOGLE_CALENDAR_CREDENTIALS: string?  # Google Calendar Service Account JSON
+    DISCORD_TOKEN: string        # Discord Bot Token（必須）
+    DISCORD_CLIENT_ID: string    # Discord Application Client ID（必須）
+    DISCORD_GUILD_ID: string?    # 開発用Guild ID（任意）
