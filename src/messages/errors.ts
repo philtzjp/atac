@@ -16,6 +16,7 @@ const ERROR_MESSAGES: Record<string, string> = {
     ENV_LOAD_FAILED: "Failed to load .env file",
     REPLY_ALREADY_SENT: "Reply has already been sent",
     REPLY_SEND_FAILED: "Failed to send reply",
+    REPLY_EDIT_FAILED: "Failed to edit reply",
     VOICE_MEMBER_NOT_IN_CHANNEL: "Member is not in a voice channel",
     VOICE_JOIN_FAILED: "Failed to join voice channel",
     VOICE_LEAVE_FAILED: "Failed to leave voice channel",

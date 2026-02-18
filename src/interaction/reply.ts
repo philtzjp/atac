@@ -2,6 +2,7 @@ import {
     EmbedBuilder,
     type ChatInputCommandInteraction,
     type InteractionReplyOptions,
+    type InteractionEditReplyOptions,
     type ActionRowBuilder,
     type ButtonBuilder,
 } from "discord.js"
@@ -83,7 +84,9 @@ export class ReplyBuilder {
     }
 
     async followUp(): Promise<void> {
-        const payload: InteractionReplyOptions = {}
+        const payload: InteractionReplyOptions = {
+            ephemeral: this.is_ephemeral,
+        }
 
         if (this.content_text !== undefined) {
             payload.content = this.content_text
@@ -101,6 +104,28 @@ export class ReplyBuilder {
             await this.interaction.followUp(payload)
         } catch (error) {
             throw new ATACError("REPLY_SEND_FAILED", { error: String(error) })
+        }
+    }
+
+    async editReply(): Promise<void> {
+        const payload: InteractionEditReplyOptions = {}
+
+        if (this.content_text !== undefined) {
+            payload.content = this.content_text
+        }
+
+        if (this.embeds_list.length > 0) {
+            payload.embeds = this.embeds_list
+        }
+
+        if (this.components_list.length > 0) {
+            payload.components = this.components_list
+        }
+
+        try {
+            await this.interaction.editReply(payload)
+        } catch (error) {
+            throw new ATACError("REPLY_EDIT_FAILED", { error: String(error) })
         }
     }
 }
