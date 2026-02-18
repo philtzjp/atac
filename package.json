@@ -1,6 +1,6 @@
 {
     "name": "@philtzjp/atac",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "ATAC (Any To Any Connectivity) - Discord Bot Core Framework",
     "type": "module",
     "main": "dist/index.js",

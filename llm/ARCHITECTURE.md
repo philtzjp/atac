@@ -87,6 +87,7 @@ voice/index.ts  ← @philtzjp/atac/voice（別エントリーポイント）
 
 ### ログ
 `Logger` クラスでプレフィクス付きの構造化ログを出力。ログメッセージは `src/messages/logger.ts` に集約。
+`registerLogMessages()` を使用して外部からカスタムメッセージキーを登録可能。登録はモジュールスコープで共有されるため、全 `Logger` インスタンスから参照できる。
 
 ## 依存関係
 

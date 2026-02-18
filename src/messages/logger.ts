@@ -1,3 +1,7 @@
+export function registerLogMessages(messages: Record<string, string>): void {
+    Object.assign(LOG_MESSAGES, messages)
+}
+
 const LOG_MESSAGES: Record<string, string> = {
     BOT_STARTING: "Bot is starting...",
     BOT_READY: "Bot is ready",

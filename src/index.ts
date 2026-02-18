@@ -21,7 +21,7 @@ export { loadEnvironment } from "./env/loader.js"
 
 // Messages
 export { ATACError, createError } from "./messages/errors.js"
-export { Logger } from "./messages/logger.js"
+export { Logger, registerLogMessages } from "./messages/logger.js"
 
 // Types
 export type { BotConfig, BotActivity, BotStartOptions, BotClient } from "./types/bot.js"
