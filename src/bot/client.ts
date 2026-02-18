@@ -63,7 +63,7 @@ export function createBot(config: BotConfig): BotClient {
                     } catch (error) {
                         logger.error("COMMAND_EXECUTION_FAILED", {
                             command: interaction.commandName,
-                            error: String(error),
+                            error,
                         })
                     }
                 }
@@ -82,7 +82,7 @@ export function createBot(config: BotConfig): BotClient {
                     } catch (error) {
                         logger.error("BUTTON_EXECUTION_FAILED", {
                             custom_id: interaction.customId,
-                            error: String(error),
+                            error,
                         })
                     }
                 }

@@ -20,7 +20,7 @@ export class ListenerRegistry {
                 } catch (error) {
                     logger.error("LISTENER_EXECUTION_FAILED", {
                         event: listener.event,
-                        error: String(error),
+                        error,
                     })
                 }
             })

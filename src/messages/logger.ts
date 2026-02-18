@@ -68,9 +68,28 @@ export class Logger {
         const formatted = `${timestamp} ${this.prefix} [${level.toUpperCase()}] ${resolved_message}`
 
         if (meta && Object.keys(meta).length > 0) {
-            console[level](formatted, meta)
+            console[level](formatted, this.expandMeta(meta))
         } else {
             console[level](formatted)
         }
+    }
+
+    private expandMeta(meta: Record<string, unknown>): Record<string, unknown> {
+        const result: Record<string, unknown> = {}
+        for (const [key, value] of Object.entries(meta)) {
+            if (value instanceof Error) {
+                const expanded: Record<string, unknown> = { message: value.message }
+                if ("code" in value) {
+                    expanded.code = (value as { code: unknown }).code
+                }
+                if ("details" in value && value.details !== null && typeof value.details === "object") {
+                    Object.assign(expanded, value.details)
+                }
+                result[key] = expanded
+            } else {
+                result[key] = value
+            }
+        }
+        return result
     }
 }

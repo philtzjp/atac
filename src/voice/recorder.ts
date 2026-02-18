@@ -177,7 +177,7 @@ export class VoiceRecorder {
             if (error && this.is_recording) {
                 logger.error("VOICE_RECORDING_FAILED", {
                     user_id,
-                    error: String(error),
+                    error,
                 })
             }
 
@@ -201,7 +201,7 @@ export class VoiceRecorder {
                 append_error => {
                     logger.error("VOICE_RECORDING_FAILED", {
                         user_id,
-                        error: String(append_error),
+                        error: append_error,
                     })
                 }
             )

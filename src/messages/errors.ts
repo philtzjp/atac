@@ -51,6 +51,13 @@ export class ATACError extends Error {
         this.code = code
         this.details = details
     }
+
+    override toString(): string {
+        const details_str = Object.keys(this.details).length > 0
+            ? ` ${JSON.stringify(this.details)}`
+            : ""
+        return `ATACError [${this.code}]: ${this.message}${details_str}`
+    }
 }
 
 export function createError(code: string, details: Record<string, unknown> = {}): ATACError {
