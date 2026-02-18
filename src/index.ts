@@ -20,7 +20,7 @@ export { HttpClient } from "./http/client.js"
 export { loadEnvironment } from "./env/loader.js"
 
 // Messages
-export { ATACError, createError } from "./messages/errors.js"
+export { ATACError, createError, registerErrorCodes } from "./messages/errors.js"
 export { Logger, registerLogMessages } from "./messages/logger.js"
 
 // Types

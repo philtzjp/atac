@@ -1,3 +1,7 @@
+export function registerErrorCodes(codes: Record<string, string>): void {
+    Object.assign(ERROR_MESSAGES, codes)
+}
+
 const ERROR_MESSAGES: Record<string, string> = {
     BOT_ALREADY_STARTED: "Bot is already started",
     BOT_NOT_STARTED: "Bot has not been started",

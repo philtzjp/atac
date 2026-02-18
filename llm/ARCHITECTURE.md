@@ -84,6 +84,7 @@ voice/index.ts  ← @philtzjp/atac/voice（別エントリーポイント）
 
 ### エラーハンドリング
 全エラーは `ATACError` クラスで統一。エラーコードとメッセージは `src/messages/errors.ts` に集約。
+`registerErrorCodes()` を使用して外部からカスタムエラーコードを登録可能。登録はモジュールスコープで共有されるため、全 `ATACError`/`createError` 呼び出しで参照できる。
 
 ### ログ
 `Logger` クラスでプレフィクス付きの構造化ログを出力。ログメッセージは `src/messages/logger.ts` に集約。
