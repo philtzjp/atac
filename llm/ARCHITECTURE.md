@@ -8,7 +8,7 @@ ATAC Core は Discord Bot 開発のための TypeScript フレームワーク。
 
 ```
 src/
-├── index.ts                 # 全モジュールのエクスポート
+├── index.ts                 # メインエントリーポイント（voice除く全モジュール）
 ├── bot/
 │   ├── client.ts            # createBot() - Botインスタンス生成
 │   ├── command.ts           # CommandRegistry, ButtonRouter
@@ -19,6 +19,7 @@ src/
 │   ├── embed.ts             # EmbedHelper
 │   └── poll.ts              # PollBuilder
 ├── voice/
+│   ├── index.ts             # voiceエントリーポイント（@philtzjp/atac/voice）
 │   └── recorder.ts          # VoiceRecorder
 ├── database/
 │   ├── neo4j.ts             # Neo4jClient
@@ -45,14 +46,16 @@ src/
 
 ```
 index.ts
-├── bot/        → messages/, types/
+├── bot/         → messages/, types/
 ├── interaction/ → messages/
-├── voice/      → messages/, voice/types
-├── database/   → messages/, database/types
-├── http/       → messages/, http/types
-├── env/        → messages/
-├── types/      （型定義のみ、依存なし）
-└── messages/   （依存なし）
+├── database/    → messages/, database/types
+├── http/        → messages/, http/types
+├── env/         → messages/
+├── types/       （型定義のみ、依存なし）
+└── messages/    （依存なし）
+
+voice/index.ts  ← @philtzjp/atac/voice（別エントリーポイント）
+└── voice/recorder.ts → messages/, types/voice
 ```
 
 ## コアコンセプト
@@ -87,17 +90,23 @@ index.ts
 
 ## 依存関係
 
-### peerDependencies（ユーザーがインストール）
+### peerDependencies（必須）
 - `discord.js` ^14.0.0
 - `zod` ^3.0.0
-- `neo4j-driver` ^5.0.0 || ^6.0.0
-- `better-sqlite3` ^11.0.0 || ^12.0.0
+
+### peerDependencies（optional）
+- `@discordjs/opus` ^0.10.0 — voice機能使用時のみ
+- `@discordjs/voice` ^0.18.0 — voice機能使用時のみ
+- `prism-media` ^1.3.5 — voice機能使用時のみ
+- `better-sqlite3` ^11.0.0 || ^12.0.0 — SQLite使用時のみ
+- `neo4j-driver` ^5.0.0 || ^6.0.0 — Neo4j使用時のみ
 
 ### dependencies（自動インストール）
 - `dotenv`
-- `@discordjs/voice`
-- `@discordjs/opus`
-- `prism-media`
+
+### エントリーポイント
+- `@philtzjp/atac` — メインエントリー（voice除く）
+- `@philtzjp/atac/voice` — voice機能専用エントリー（`@discordjs/voice`等が必要）
 
 ## Docker
 

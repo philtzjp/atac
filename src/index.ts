@@ -9,9 +9,6 @@ export { ButtonRowBuilder } from "./interaction/button.js"
 export { EmbedHelper } from "./interaction/embed.js"
 export { PollBuilder } from "./interaction/poll.js"
 
-// Voice
-export { VoiceRecorder } from "./voice/recorder.js"
-
 // Database
 export { Neo4jClient } from "./database/neo4j.js"
 export { SQLiteClient } from "./database/sqlite.js"
@@ -30,12 +27,6 @@ export { Logger } from "./messages/logger.js"
 export type { BotConfig, BotActivity, BotStartOptions, BotClient } from "./types/bot.js"
 export type { Command, ButtonHandler } from "./types/command.js"
 export type { Listener } from "./types/listener.js"
-export type {
-    VoiceRecorderConfig,
-    RecordingSession,
-    RecordingSegment,
-    ParticipantInfo,
-} from "./types/voice.js"
 export type { Neo4jConfig, SQLiteConfig, Neo4jTransaction } from "./types/database.js"
 export type { HttpClientConfig, RequestOptions, HttpResponse } from "./types/http.js"
 export type { PollOption } from "./types/poll.js"
