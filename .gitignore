@@ -1,12 +1,6 @@
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-
-# Environment
-.env
-.env.local
+# OS
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
@@ -14,21 +8,9 @@ dist/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
 
 # Logs
 *.log
-npm-debug.log*
-
-# Test coverage
-coverage/
-
-# Temporary files
-temp/
-tmp/
-*.tmp
-
-# Recordings (local only)
-recordings/
